@@ -26,9 +26,9 @@ DSH（DeepSeek Harness）插件：**峰谷电价时段查询 + DeepSeek API 余�
 ## 安装（Profile Bundle，推荐）
 
 ```sh
-dsh plugin --profile web add "C:/Users/autumn/Desktop/deepseekharness-test/dsh-tool-tariff"
+dsh plugin --profile web add "C:/Users/autumn/Desktop/deepseekharness-test/plugins/dsh-tool-tariff"
 # 一次性任务/headless 也要用时：
-dsh plugin --profile headless add "C:/Users/autumn/Desktop/deepseekharness-test/dsh-tool-tariff"
+dsh plugin --profile headless add "C:/Users/autumn/Desktop/deepseekharness-test/plugins/dsh-tool-tariff"
 ```
 
 验证已挂载：
