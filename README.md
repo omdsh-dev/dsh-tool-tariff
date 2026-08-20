@@ -9,7 +9,7 @@ DSH（DeepSeek Harness）插件：**峰谷电价时段查询 + DeepSeek API 余�
 - 定时提醒：每天 `08:50`、`13:50`（可配置）自动提醒"10 分钟后进入峰时"；
 - **顶部栏状态徽标**（Web GUI 会话头部右侧）：实时显示 `时间 | 当前时段与切换倒计时 | 账户余额`，
   时间与倒计时每秒刷新（本地计算）；余额**不自动轮询**——点击余额徽标查询一次
-  （host 侧另有 60s 缓存，频繁点击不会反复打余额接口）；数据经 `/api` RPC 走 host 侧
+  （host 侧另有 60s 缓存，频繁点击不会反复打余额接口）；数据经 `/tariff` RPC 通道走 host 侧
   （浏览器不接触 API Key）。
 
 ## 时段规则（默认）
@@ -96,7 +96,7 @@ npm pack           # 可发布 tarball
 src/tariff.ts     峰谷时段纯逻辑（分类/时段表/下次切换/时区换算）
 src/balance.ts    DeepSeek /user/balance 查询（可注入 fetch）
 src/reminder.ts   提醒调度器（轮询窗口、每日一次、可注入时钟）
-src/index.ts      插件入口：注册两个工具 + 提醒接线 + /api RPC 通道（tariff/status、tariff/balance）
+src/index.ts      插件入口：注册两个工具 + 提醒接线 + /tariff RPC 通道（status、balance）
 client/client.js  浏览器 half（ModuleLoader bundle）：顶部栏状态徽标组件
 scripts/          build 时把 client/client.js 拷贝进 lib/
 tests/            逻辑测试 + 注册契约测试 + 客户端 bundle 契约测试
@@ -106,8 +106,10 @@ tests/            逻辑测试 + 注册契约测试 + 客户端 bundle 契约测
 
 - 位置：会话头部（顶部栏）右侧 `conversation.session.header.utilities` 插槽，条目 id `tariff-status`；
 - 内容：`[时间] [峰时/谷时 · 倒计时] [余额]`——峰时橙色、谷时绿色，倒计时精确到秒；
-- 数据通道：浏览器侧经 `/api` RPC 调 host half（`tariff/status` 取时段配置与宿主时区、
-  `tariff/balance` 取余额）；**API Key 只存在于 host 侧**，浏览器永不接触；
+- 数据通道：浏览器侧经专用 `/tariff` RPC 通道调 host half（`status` 取时段配置与宿主时区、
+  `balance` 取余额）；**API Key 只存在于 host 侧**，浏览器永不接触。注意不要占用 `/api`
+  通道——那是 DSH 网关（Typert Remote）独占的共享通道，第三方插件抢占会导致插件列表、
+  命令执行等所有 Remote 静默失效；
 - 余额不自动轮询：点击余额徽标查询一次（host 侧另有 60s 缓存）；查询中显示"查询中…"，
   连接不可用或未配置 Key 时显示"余额不可用"（悬停可见原因），点击可重试。
 

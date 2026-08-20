@@ -9,7 +9,7 @@ A DeepSeek Harness (DSH) plugin: **peak/off-peak electricity tariff lookup + Dee
 - Scheduled reminders: automatically reminds you "peak hour starts in 10 minutes" every day at `08:50` and `13:50` (configurable);
 - **Top-bar status badge** (right side of the session header in the Web GUI): shows `time | current period and countdown to the next switch | account balance`.
   Time and countdown refresh every second (computed locally); the balance is **not polled automatically** — click the balance badge to query once
-  (the host side additionally caches for 60 s, so frequent clicks do not hit the balance endpoint repeatedly); data flows over the `/api` RPC to the host side
+  (the host side additionally caches for 60 s, so frequent clicks do not hit the balance endpoint repeatedly); data flows over the `/tariff` RPC channel to the host side
   (the browser never touches the API key).
 
 ## Tariff rules (default)
@@ -96,7 +96,7 @@ npm pack           # publishable tarball
 src/tariff.ts     Peak/off-peak period pure logic (classification / schedule / next switch / timezone conversion)
 src/balance.ts    DeepSeek /user/balance query (injectable fetch)
 src/reminder.ts   Reminder scheduler (window polling, once per day, injectable clock)
-src/index.ts      Plugin entry: registers both tools + reminder wiring + /api RPC channel (tariff/status, tariff/balance)
+src/index.ts      Plugin entry: registers both tools + reminder wiring + /tariff RPC channel (status, balance)
 client/client.js  Browser half (ModuleLoader bundle): top-bar status badge component
 scripts/          Copies client/client.js into lib/ at build time
 tests/            Logic tests + registration contract tests + client bundle contract tests
@@ -106,8 +106,10 @@ tests/            Logic tests + registration contract tests + client bundle cont
 
 - Location: `conversation.session.header.utilities` slot on the right of the session header (top bar), entry id `tariff-status`;
 - Content: `[time] [peak/off-peak · countdown] [balance]` — peak is orange, off-peak is green, countdown is second-precise;
-- Data channel: the browser side calls the host half over `/api` RPC (`tariff/status` for the period config and host timezone,
-  `tariff/balance` for the balance); **the API key exists only on the host side and never reaches the browser**;
+- Data channel: the browser side calls the host half over the dedicated `/tariff` RPC channel (`status` for the period config and host timezone,
+  `balance` for the balance); **the API key exists only on the host side and never reaches the browser**. Do not occupy the `/api` channel —
+  it is the shared channel reserved for the DSH gateway (Typert Remotes); a third-party plugin that intercepts it silently breaks the plugin
+  list, command execution, and every other Remote;
 - The balance is not polled: click the balance badge to query once (the host side caches for 60 s); it shows "querying…" while in flight,
   and "balance unavailable" (hover for the reason) when the connection is down or no key is configured — click to retry.
 

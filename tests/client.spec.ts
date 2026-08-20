@@ -7,7 +7,7 @@ import { readFileSync } from 'node:fs'
  * - ModuleLoader.load 注册形态（id + factory）；
  * - factory 物化出 cordis 插件（name/inject/apply）；
  * - apply 经 ctx.slots.inject 注册 conversation.session.header.utilities 条目；
- * - 无 connection 时 api 为 null，有 connection 时组件经 /api RPC 调用 host。
+ * - 无 connection 时 api 为 null，有 connection 时组件经 /tariff RPC 通道调用 host。
  */
 function loadClientBundle(sourcePath: string) {
   const code = readFileSync(new URL(sourcePath, import.meta.url), 'utf8')
@@ -71,7 +71,7 @@ describe('tariff client bundle: ModuleLoader contract', () => {
     expect(typeof registered?.component).toBe('function')
   })
 
-  it('wires the /api RPC call when the connection service exists', () => {
+  it('wires the /tariff RPC call when the connection service exists', () => {
     const calls: unknown[] = []
     const fakeConnection = {
       rpc: { call: (channel: string, method: string, payload?: unknown) => { calls.push([channel, method, payload]); return Promise.resolve({ ok: true, value: null }) } },
@@ -87,14 +87,14 @@ describe('tariff client bundle: ModuleLoader contract', () => {
     plugin.apply(ctx)
     const element = registered?.component({}) as { props: { api: { call: (m: string, a: unknown) => Promise<unknown> } } }
     expect(element.props.api).toBeTruthy()
-    void element.props.api.call('tariff/balance')
+    void element.props.api.call('balance')
     // payload 缺省必须显式为 null：host 的 clientRequestSchema 要求 payload
     // 字段必填，undefined 在 JSON 序列化时被丢弃会导致 bad-request。
-    expect(calls).toEqual([['/api', 'tariff/balance', null]])
-    void element.props.api.call('tariff/status', { force: true })
+    expect(calls).toEqual([['/tariff', 'balance', null]])
+    void element.props.api.call('status', { force: true })
     expect(calls).toEqual([
-      ['/api', 'tariff/balance', null],
-      ['/api', 'tariff/status', { force: true }],
+      ['/tariff', 'balance', null],
+      ['/tariff', 'status', { force: true }],
     ])
   })
 
