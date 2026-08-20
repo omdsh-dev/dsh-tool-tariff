@@ -1,0 +1,68 @@
+{
+  "name": "@deepseek-ai/dsh-tool-tariff",
+  "description": "DSH 峰谷电价时段查询 + DeepSeek API 余额查询 + 峰时切换提醒插件（含顶部栏状态徽标）",
+  "version": "0.0.2",
+  "private": true,
+  "type": "module",
+  "main": "lib/index.js",
+  "types": "lib/types/index.d.ts",
+  "license": "MIT",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "packageManager": "npm@11.16.0",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json && node scripts/copy-client.mjs",
+    "test": "vitest run tests",
+    "check": "npm run typecheck && npm test && npm run build",
+    "prepack": "npm run build"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-invariants": ">=0.0.1-rc.1 <0.2.0",
+    "@deepseek-ai/dsh-tools": ">=0.0.1-rc.1 <0.2.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-connection"
+      ],
+      "immediately": true
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./lib/types/index.d.ts",
+      "default": "./lib/index.js"
+    },
+    "./client": "./lib/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "src",
+    "client",
+    "cordis.patch.yml"
+  ],
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-agent": "^0.1.0-rc.8",
+    "@deepseek-ai/dsh-client-connection": "^0.1.0-rc.8",
+    "@deepseek-ai/dsh-credentials": "^0.1.0-rc.8",
+    "@deepseek-ai/dsh-host-apiproxy": "^0.1.0-rc.8",
+    "@deepseek-ai/dsh-invariants": "^0.1.0-rc.8",
+    "@deepseek-ai/dsh-launch-environment": "^0.1.0-rc.8",
+    "@deepseek-ai/dsh-llm": "^0.1.0-rc.8",
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.8",
+    "@types/node": "^26.2.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}
