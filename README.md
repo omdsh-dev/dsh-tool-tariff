@@ -1,5 +1,7 @@
 # dsh-tool-tariff
 
+[English](README.en.md)
+
 DSH（DeepSeek Harness）插件：**峰谷电价时段查询 + DeepSeek API 余额查询 + 峰时切换提醒 + 顶部栏状态徽标**。
 
 - `tariff` 工具：查询当前处于峰时还是谷时、完整时段表、下一次切换时刻；
