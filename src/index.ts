@@ -23,8 +23,7 @@ import { launchEnvironmentOf } from '@deepseek-ai/dsh-launch-environment'
 import { createUserMessage } from '@deepseek-ai/dsh-llm'
 import type { ContextFormed } from '@deepseek-ai/dsh-llm'
 import type { AgentRegistry } from '@deepseek-ai/dsh-agent'
-import type { ConnectionRpcHandler, HostConnectionHandle } from '@deepseek-ai/dsh-client-connection'
-import type { RpcResult } from '@deepseek-ai/dsh-host-apiproxy/api'
+import type { ConnectionRpcHandler, ConnectionRpcResult, HostConnectionHandle } from '@deepseek-ai/dsh-client-connection'
 import { clockTimeIn, resolveTimeArg, tariffStatus } from './tariff.ts'
 import { fetchBalance } from './balance.ts'
 import type { BalanceResult } from './balance.ts'
@@ -217,7 +216,6 @@ export function apply(ctx: Context, rawConfig: Partial<TariffPluginConfig> = {})
     const dispose = connection.rpc.handle(
       '/tariff',
       handler,
-      { authority: 'loopback' },
     )
     scopedCtx.effect(() => dispose, 'dsh-tool-tariff: /tariff RPC 通道')
   })
@@ -260,7 +258,7 @@ export function apply(ctx: Context, rawConfig: Partial<TariffPluginConfig> = {})
   }
 }
 
-/** 构造一个 RpcResult 错误分支（code 用兜底的 internal）。 */
-function rpcError(message: string): RpcResult<never> {
+/** 构造一个 ConnectionRpcResult 错误分支（code 用兜底的 internal）。 */
+function rpcError(message: string): ConnectionRpcResult<never> {
   return { ok: false, error: { code: 'internal', message, details: {} } }
 }
